@@ -81,8 +81,10 @@ def get_bbox_range(img_list,upperbondrange =0):
     return text_range
     
 
-def get_landmark_and_bbox(img_list,upperbondrange =0):
-    frames = read_imgs(img_list)
+def get_landmark_and_bbox(img_list,upperbondrange =0, read=True):
+    frames = img_list
+    if read:
+        frames = read_imgs(img_list)
     batch_size_fa = 1
     batches = [frames[i:i + batch_size_fa] for i in range(0, len(frames), batch_size_fa)]
     coords_list = []
