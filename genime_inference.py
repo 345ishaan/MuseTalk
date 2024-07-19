@@ -39,7 +39,7 @@ def infer(image_urls, audio_urls, save_dir, batch_size=8, fps=25, bbox_shift=0, 
             image_data = np.asarray(bytearray(response.content), dtype="uint8")
             image = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
             assert image is not None
-            input_img_list = [image[:,:,::-1]]
+            input_img_list = [image]
         else:
             raise Exception(f"Failed to download image blob {image_url}")
         ############################################## extract audio feature ##############################################
@@ -55,9 +55,6 @@ def infer(image_urls, audio_urls, save_dir, batch_size=8, fps=25, bbox_shift=0, 
         whisper_chunks = audio_processor.feature2chunks(feature_array=whisper_feature,fps=fps)
         ############################################## preprocess input image  ##############################################
         coord_list, frame_list = get_landmark_and_bbox(input_img_list, bbox_shift, read=False)
-        # reverse to BGR order for cv processing.
-        for frame_idx in range(len(frame_list)):
-            frame_list[frame_idx] = frame_list[frame_idx][:,:,::-1]
         i = 0
         input_latent_list = []
         for bbox, frame in zip(coord_list, frame_list):
@@ -148,7 +145,7 @@ if __name__ == "__main__":
     ]
     image_urls = [
         "https://ttvaarlnqssopdguetwq.supabase.co/storage/v1/object/sign/genime-bucket/character_tushar.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJnZW5pbWUtYnVja2V0L2NoYXJhY3Rlcl90dXNoYXIud2VicCIsImlhdCI6MTcyMTI5NDQzMiwiZXhwIjoxNzUyODMwNDMyfQ.S12pYdgP89LSr65YAv7rfY2_xsCbdaa7wWG3aTxpMS0&t=2024-07-18T09%3A20%3A32.159Z",
-        "https://ttvaarlnqssopdguetwq.supabase.co/storage/v1/object/sign/genime-bucket/character_ishan.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJnZW5pbWUtYnVja2V0L2NoYXJhY3Rlcl9pc2hhbi53ZWJwIiwiaWF0IjoxNzIxMjk0MzA1LCJleHAiOjE3NTI4MzAzMDV9.HIKhQVjq1TxJYOLSbQRJXL0qxWH7FI4lXSqv0j4by3Y&t=2024-07-18T09%3A18%3A26.076Z"
+        "https://ttvaarlnqssopdguetwq.supabase.co/storage/v1/object/sign/genime-bucket/character_ishan2.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJnZW5pbWUtYnVja2V0L2NoYXJhY3Rlcl9pc2hhbjIud2VicCIsImlhdCI6MTcyMTM3NjkzMywiZXhwIjoxNzUyOTEyOTMzfQ.qHguLkQe09QFdYd9ZMQ-mD9m8UYOZ5FFJD_1PZlTsFM&t=2024-07-19T08%3A15%3A33.669Z"
     ]
     audio_urls = [
         "https://ttvaarlnqssopdguetwq.supabase.co/storage/v1/object/sign/genime-bucket/15.wav?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJnZW5pbWUtYnVja2V0LzE1LndhdiIsImlhdCI6MTcyMTIwMTMzNiwiZXhwIjoxNzUyNzM3MzM2fQ.bVOALJpkftbX5fAkkVTbLLjbaMVBwWmQmfhTFO1o65I",

@@ -81,12 +81,15 @@ def get_bbox_range(img_list,upperbondrange =0):
     return text_range
     
 
-def get_landmark_and_bbox(img_list,upperbondrange =0, read=True):
+def get_landmark_and_bbox(img_list,upperbondrange =0, read=True, invert_channel_for_face=False):
     frames = img_list
     if read:
         frames = read_imgs(img_list)
     batch_size_fa = 1
-    batches = [frames[i:i + batch_size_fa] for i in range(0, len(frames), batch_size_fa)]
+    if invert_channel_for_face:
+        batches = [[f[:,:,::-1] for f in frames[i:i + batch_size_fa]] for i in range(0, len(frames), batch_size_fa)]
+    else:
+        batches = [frames[i:i + batch_size_fa] for i in range(0, len(frames), batch_size_fa)]
     coords_list = []
     landmarks = []
     if upperbondrange != 0:
@@ -101,7 +104,6 @@ def get_landmark_and_bbox(img_list,upperbondrange =0, read=True):
         keypoints = results.pred_instances.keypoints
         face_land_mark= keypoints[0][23:91]
         face_land_mark = face_land_mark.astype(np.int32)
-        
         # get bounding boxes by face detetion
         bbox = fa.get_detections_for_batch(np.asarray(fb))
         
@@ -131,7 +133,9 @@ def get_landmark_and_bbox(img_list,upperbondrange =0, read=True):
                 print("error bbox:",f)
             else:
                 coords_list += [f_landmark]
-    
+    if not len(average_range_minus) or not len(average_range_plus):
+        print ("Rerunning land mark and face bbox with channel inversion")
+        return get_landmark_and_bbox(img_list, upperbondrange=upperbondrange, read=read,invert_channel_for_face=True)
     print("********************************************bbox_shift parameter adjustment**********************************************************")
     print(f"Total frame:「{len(frames)}」 Manually adjust range : [ -{int(sum(average_range_minus) / len(average_range_minus))}~{int(sum(average_range_plus) / len(average_range_plus))} ] , the current value: {upperbondrange}")
     print("*************************************************************************************************************************************")
